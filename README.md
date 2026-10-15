@@ -4,8 +4,8 @@ El siguiente repositorio muestra el desarrollo de un enfoque híbrido de analít
 
 El proyecto se ejecutará en cuatro fases principales, diseñadas para dar cumplimiento a los objetivos específicos planteados:
 
-Fase 1: Comprensión y Preparación de los Datos
-Fase 2: Clasificación del Portafolio
-Fase 3: Diseño del modelo predictivo
-Fase 4: Evaluación
+- Fase 1: Comprensión y Preparación de los Datos
+- Fase 2: Clasificación del Portafolio
+- Fase 3: Diseño del modelo predictivo
+- Fase 4: Evaluación
 
