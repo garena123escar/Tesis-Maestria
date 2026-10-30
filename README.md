@@ -68,12 +68,6 @@ Los notebooks están pensados para **Microsoft Fabric** con un Lakehouse asociad
 
 Para ejecutarlos fuera de Fabric se necesita una sesión de Spark con soporte Delta y una función `display` (por ejemplo, `from IPython.display import display`).
 
-## Buenas prácticas para mantener el repositorio limpio
-
-- No subir notebooks con salidas: `nbstripout --install` elimina las salidas automáticamente en cada commit.
-- Mantener `REVISION_INTERNA = False` en cualquier versión publicada (controla si se muestran nombres de clientes).
-- Los valores reales de la celda de parámetros solo deben vivir en el entorno privado.
-
 ## Autor
 
 **Daniel Escobar Cardona** — Maestría en Analítica e Inteligencia de Negocios, Universidad del Valle.
