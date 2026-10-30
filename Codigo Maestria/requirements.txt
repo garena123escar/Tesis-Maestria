@@ -1,0 +1,16 @@
+# En Microsoft Fabric estas librerías ya vienen en el entorno de ejecución.
+# Este archivo sirve para reproducir el entorno fuera de Fabric.
+pyspark
+delta-spark
+pandas
+numpy
+matplotlib
+seaborn
+scipy
+scikit-learn
+threadpoolctl
+openpyxl        # lectura del archivo de equivalencias (.xlsx)
+ipython
+
+# Opcional, para limpiar salidas de los notebooks antes de cada commit
+nbstripout
