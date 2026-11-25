@@ -9,6 +9,10 @@ seaborn
 scipy
 scikit-learn
 threadpoolctl
+statsmodels     # ETS, SARIMA y descomposición STL (Fase 3)
+xgboost
+tensorflow      # LSTM e híbrido ARIMA-CNN-LSTM (Fase 3)
+joblib          # archivos del modelo propuesto (Fase 3)
 openpyxl        # lectura del archivo de equivalencias (.xlsx)
 ipython
 
