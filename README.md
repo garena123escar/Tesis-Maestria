@@ -2,7 +2,7 @@
 
 Código del trabajo integrador de la **Maestría en Analítica e Inteligencia de Negocios** (Universidad del Valle). El proyecto propone un enfoque híbrido para una empresa distribuidora de suplementos vitamínicos: primero clasifica el portafolio combinando la **importancia** de cada producto con la **dificultad de pronosticar** su demanda, y luego concentra el modelo de predicción en el grupo de productos donde un mejor pronóstico aporta más valor.
 
-El trabajo sigue la metodología **CRISP-DM** y se desarrolla en notebooks de PySpark sobre Microsoft Fabric, con datos transaccionales extraídos de SAP Business One (SAP HANA).
+El trabajo sigue la metodología **CRISP-DM** y se desarrolla en **tres notebooks de PySpark, uno por fase**, sobre Microsoft Fabric, con datos transaccionales extraídos de SAP Business One (SAP HANA). La evaluación (Fase 4 del proyecto) no tiene notebook propio: se hace dentro del notebook de cada modelo (A4.1 en la Fase 2 y A4.2 en la Fase 3).
 
 > **Confidencialidad.** El repositorio no contiene datos, salidas ni información de la empresa. Los nombres de servidor, base de datos, archivos internos, bodegas y patrones de codificación se reemplazaron por parámetros genéricos, y las celdas de interpretación explican cómo leer cada resultado sin cifras del negocio.
 
@@ -22,7 +22,7 @@ Tesis-Maestria/
 | Notebook | Actividades | Qué hace |
 |---|---|---|
 | `01_fase1_comprension_preparacion_datos` | A1.1 – A1.3 | Homologa códigos de producto, fija la ventana de análisis, caracteriza la demanda (Pareto/ABC, Syntetos-Boylan, XYZ, clientes, inventario, devoluciones, promociones), aplica seis reglas de calidad con trazabilidad y construye las tablas base analíticas. |
-| `02_fase2_clasificacion_productos` | A2.1 – A2.4, A4.1 | Primero compara las líneas comerciales en tres dimensiones (importancia, dificultad de pronóstico y costo del error de inventario) con TOPSIS y 10.000 simulaciones de pesos de Dirichlet, prioriza una línea y guarda `fs2_priorizacion_lineas`. Luego clasifica los productos en dos ejes (prioridad y pronosticabilidad) con varias familias de métodos, mide su concordancia y estabilidad, selecciona el grupo piloto por consenso y lo valida con un backtest. Se ejecuta sobre la línea priorizada y sobre el universo total. |
+| `02_fase2_clasificacion_productos` | A2.1 – A2.4, A4.1 | Un solo notebook en dos partes. Primero (A2.1) compara las líneas comerciales en tres dimensiones (importancia, dificultad de pronóstico y costo del error de inventario) con TOPSIS y 10.000 simulaciones de pesos de Dirichlet, prioriza una línea y guarda `fs2_priorizacion_lineas`. Luego (A2.2 a A2.4 y A4.1), en el mismo notebook, clasifica los productos en dos ejes (prioridad y pronosticabilidad) con varias familias de métodos, mide su concordancia y estabilidad, selecciona el grupo piloto por consenso y lo valida con un backtest. Se ejecuta sobre la línea priorizada y sobre el universo total. |
 | `03_fase3_pronostico_piloto` | A3.1 – A3.4, A4.2 | Analiza las series y los picos de los productos piloto, compara diez métodos (simples, ETS, SARIMA, XGBoost, Random Forest, LSTM e híbrido ARIMA-CNN-LSTM) con validación de origen móvil, ajusta Random Forest y sus variantes, prueba la significancia con Wilcoxon, guarda el modelo propuesto y genera los pronósticos de los tres meses siguientes. |
 
 ## Flujo de datos
@@ -33,9 +33,8 @@ flowchart LR
     B --> C[Fase 1<br/>EDA y limpieza]
     C --> D[(gld_abt_sku_mes<br/>ABT mensual)]
     C --> E[(gld_abt_sku<br/>características por SKU)]
-    E --> F[Fase 2<br/>clasificación]
+    E --> F[Fase 2<br/>A2.1 priorización de líneas<br/>A2.2-A2.4 clasificación]
     D --> F
-    F --> P[(fs2_priorizacion_lineas<br/>A2.1)]
     F --> G[(fs2_abt_sku_mes_piloto<br/>insumo de la Fase 3)]
     G --> H[Fase 3<br/>modelo de predicción]
     H --> I[(fs3_piloto_*<br/>pronósticos, métricas y modelo)]
@@ -55,8 +54,7 @@ flowchart LR
 
 **Fase 2 — Clasificación de los productos**
 
-- Priorización de las líneas comerciales (A2.1): ocho criterios en tres dimensiones, TOPSIS con pesos por dimensión y por entropía, y 10.000 simulaciones de pesos de Dirichlet.
-
+- Priorización de las líneas comerciales (A2.1, primera parte del notebook): ocho criterios en tres dimensiones, TOPSIS con pesos por dimensión y por entropía, y 10.000 simulaciones de pesos de Dirichlet.
 - Eje de **prioridad** (valor, crecimiento y costo del error en inventario) y eje de **pronosticabilidad** (regularidad, intermitencia e historia).
 - Métodos multicriterio: TOPSIS, VIKOR y PROMETHEE II, con pesos iguales, entropía y CRITIC.
 - Clustering: K-means, Ward y GMM, con selección de k por índices internos.
@@ -78,7 +76,7 @@ Los notebooks están pensados para **Microsoft Fabric** con un Lakehouse asociad
 1. Cargar en el Lakehouse las tablas de origen: `Pedidos`, `Ventas`, `Devoluciones`, `Inventario` y `Productos` (consultas en la sección 1.1 de la Fase 1), más el archivo de equivalencias de códigos.
 2. Crear en el Lakehouse el archivo `Files/config_privada.json` con los valores reales de las claves de la celda **Parámetros específicos del entorno** de la Fase 1 (ruta y formato del archivo de equivalencias, bodegas, patrones de muestras y líneas excluidas). Ese archivo no se publica; si no existe, el notebook usa los valores de ejemplo.
 3. Ajustar `VERSIONES` (sección 1.1) con las versiones Delta del snapshot y ejecutar la Fase 1.
-4. Ejecutar `02_fase2_clasificacion_productos`: su primera parte (A2.1) genera `fs2_priorizacion_lineas`, que lee la segunda.
+4. Ejecutar `02_fase2_clasificacion_productos` completo: la parte A2.1, al inicio del notebook, prioriza la línea y guarda `fs2_priorizacion_lineas`, que la parte siguiente del mismo notebook lee para clasificar los productos.
 5. Ejecutar `03_fase3_pronostico_piloto`, que lee las tablas de la Fase 2 y deja los pronósticos, las métricas y el modelo en el Lakehouse.
 
 Al ejecutarse, cada notebook guarda además sus figuras a 300 dpi en `Files/figuras_tesis/` del Lakehouse.
